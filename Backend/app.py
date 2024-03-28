@@ -1,19 +1,13 @@
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
-
-app = Flask(__name__)
-
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:jason2002@localhost:3306/cellData'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
-db = SQLAlchemy(app)
-
+from extensions import db
 from routes.api import api_bp
 
-app.register_blueprint(api_bp, url_prefix='/api')
+app = Flask(__name__)
+app.config.from_pyfile('config.py')
 
-from models.cell_data import CellData
-from app import db
+db.init_app(app)
+
+app.register_blueprint(api_bp, url_prefix='/api')
 
 def calculate_average_connectivity_time(operator):
     cell_data_records = CellData.query.filter_by(operator=operator).all()
