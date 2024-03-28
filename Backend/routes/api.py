@@ -41,9 +41,9 @@ def get_all_cell_data():
         'network_type': record.network_type,
         'frequency_band': record.frequency_band,
         'cell_id': record.cell_id,
-        'timestamp': record.timestamp.strftime('%d %b %Y %I:%M %p')  # Convert datetime object to string
+        'timestamp': record.timestamp.strftime('%d %b %Y %I:%M %p')  
     } for record in cell_data_records]
 
     return jsonify(result), 200
 
-# Additional routes for retrieving statistics and handling user requests can be added here
+# add routes for stats here

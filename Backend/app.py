@@ -1,12 +1,19 @@
 from flask import Flask
+from models.cell_data import CellData
 from extensions import db
+from flask_bcrypt import Bcrypt
+from flask_jwt_extended import JWTManager
 from routes.api import api_bp
+from routes.auth import auth_bp
 
 app = Flask(__name__)
 app.config.from_pyfile('config.py')
 
 db.init_app(app)
+bcrypt = Bcrypt(app)
+jwt = JWTManager(app)
 
+app.register_blueprint(auth_bp, url_prefix='/api/auth')
 app.register_blueprint(api_bp, url_prefix='/api')
 
 def calculate_average_connectivity_time(operator):
@@ -16,7 +23,7 @@ def calculate_average_connectivity_time(operator):
     num_records = len(cell_data_records)
 
     for record in cell_data_records:
-        total_connectivity_time += record.timestamp.timestamp()  
+        total_connectivity_time += record.timestamp.timestamp()
 
     if num_records > 0:
         average_connectivity_time = total_connectivity_time / num_records
