@@ -5,6 +5,7 @@ from flask_bcrypt import Bcrypt
 from flask_jwt_extended import JWTManager
 from routes.api import api_bp
 from routes.auth import auth_bp
+from flask_migrate import Migrate
 
 app = Flask(__name__)
 app.config.from_pyfile('config.py')
@@ -15,6 +16,9 @@ jwt = JWTManager(app)
 
 app.register_blueprint(auth_bp, url_prefix='/api/auth')
 app.register_blueprint(api_bp, url_prefix='/api')
+
+from models import cell_data, user
+migrate = Migrate(app, db)
 
 def calculate_average_connectivity_time(operator):
     cell_data_records = CellData.query.filter_by(operator=operator).all()
@@ -49,4 +53,4 @@ def calculate_avg_signal_power_per_network_type(network_type):
     return average_signal_power
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', debug=True)

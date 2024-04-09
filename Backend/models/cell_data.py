@@ -2,6 +2,7 @@ from extensions import db
 
 class CellData(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     operator = db.Column(db.String(50))
     signal_power = db.Column(db.Float)
     sinr = db.Column(db.Float)

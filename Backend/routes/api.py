@@ -2,14 +2,18 @@ from datetime import datetime
 from flask import Blueprint, request, jsonify
 from models.cell_data import CellData
 from app import db
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 api_bp = Blueprint('api', __name__)
 
 @api_bp.route('/cell_data', methods=['POST'])
+@jwt_required()
 def add_cell_data():
     data = request.json
+    current_user_id = get_jwt_identity()
 
     new_cell_data = CellData(
+        user_id=current_user_id,
         operator=data['operator'],
         signal_power=data['signal_power'],
         sinr=data['sinr'],
@@ -30,9 +34,12 @@ def add_cell_data():
     finally:
         db.session.close()
 
+
 @api_bp.route('/cell_data', methods=['GET'])
+@jwt_required() 
 def get_all_cell_data():
-    cell_data_records = CellData.query.all()
+    current_user_id = get_jwt_identity()
+    cell_data_records = CellData.query.filter_by(user_id=current_user_id).all()
 
     result = [{
         'operator': record.operator,
