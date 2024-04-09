@@ -5,17 +5,36 @@ from flask_jwt_extended import create_access_token
 
 auth_bp = Blueprint('auth', __name__)
 
+import re
+
 @auth_bp.route('/signup', methods=['POST'])
 def sign_up():
     data = request.json
 
+    if not {'username', 'password'}.issuperset(data.keys()):
+        return jsonify({'error': 'Invalid request. Only username and password are allowed'}), 400
+
     if User.query.filter_by(username=data['username']).first() is not None:
         return jsonify({'error': 'Username already exists'}), 400
-    if User.query.filter_by(email=data['email']).first() is not None:
-        return jsonify({'error': 'Email already exists'}), 400
 
-    new_user = User(username=data['username'], email=data['email'])
-    new_user.set_password(data['password'])
+    password = data['password']
+    if len(password) < 8:
+        return jsonify({'error': 'Password must be at least 8 characters long'}), 400
+
+    if not re.search(r'[A-Z]', password):
+        return jsonify({'error': 'Password must contain at least one uppercase letter'}), 400
+
+    if not re.search(r'[a-z]', password):
+        return jsonify({'error': 'Password must contain at least one lowercase letter'}), 400
+
+    if not re.search(r'\d', password):
+        return jsonify({'error': 'Password must contain at least one digit'}), 400
+
+    if not re.search(r'[!@#$%^&*(),.?":{}|<>]', password):
+        return jsonify({'error': 'Password must contain at least one special character'}), 400
+
+    new_user = User(username=data['username'])
+    new_user.set_password(password)
     db.session.add(new_user)
 
     try:
@@ -26,6 +45,8 @@ def sign_up():
         return jsonify({'error': str(e)}), 500
     finally:
         db.session.close()
+
+
 
 @auth_bp.route('/login', methods=['POST'])
 def login():
