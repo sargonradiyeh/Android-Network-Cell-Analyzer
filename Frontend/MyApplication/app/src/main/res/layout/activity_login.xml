@@ -36,7 +36,7 @@
         android:id="@+id/attemptsLeftTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="3 attempts left" />
+        android:text="5" />
 
     <Button
         android:id="@+id/loginButton"
