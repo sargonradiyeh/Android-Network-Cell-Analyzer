@@ -17,6 +17,11 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.CountDownTimer;
 import android.content.Intent;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+
+
 
 
 public class LoginActivity extends AppCompatActivity {
@@ -89,18 +94,48 @@ public class LoginActivity extends AppCompatActivity {
                             int responseCode = connection.getResponseCode();
                             if (responseCode == HttpURLConnection.HTTP_OK) {
                                 // Successful login
-                                runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        Toast.makeText(getApplicationContext(), "Login successful!", Toast.LENGTH_SHORT).show();
-                                        // Reset attempts_left and update SharedPreferences
-                                        attemptsLeft = 5;
-                                        SharedPreferences.Editor editor = sharedPreferences.edit();
-                                        editor.putInt("attempts_left", attemptsLeft);
-                                        editor.apply();
-                                        attemptsLeftTextView.setText(Integer.toString(attemptsLeft));
+                                try {
+                                    // Read token from response body
+                                    InputStream inputStream = connection.getInputStream();
+                                    BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+                                    StringBuilder response = new StringBuilder();
+                                    String line;
+                                    while ((line = bufferedReader.readLine()) != null) {
+                                        response.append(line);
                                     }
-                                });
+                                    bufferedReader.close();
+                                    inputStream.close();
+
+                                    // Parse JSON response to get the token
+                                    JSONObject jsonResponse = new JSONObject(response.toString());
+                                    final String token = jsonResponse.getString("token");
+
+                                    runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            Toast.makeText(getApplicationContext(), "Login successful!", Toast.LENGTH_SHORT).show();
+                                            // Store token securely
+                                            saveToken(token);
+                                            // Reset attempts_left and update SharedPreferences
+                                            attemptsLeft = 5;
+                                            SharedPreferences.Editor editor = sharedPreferences.edit();
+                                            editor.putInt("attempts_left", attemptsLeft);
+                                            editor.apply();
+                                            attemptsLeftTextView.setText(Integer.toString(attemptsLeft));
+                                            // Proceed to next activity or perform any necessary action
+                                            startActivity(new Intent(LoginActivity.this, HomeActivity.class));
+                                            finish(); // Close LoginActivity
+                                        }
+                                    });
+                                } catch (IOException | JSONException e) {
+                                    e.printStackTrace();
+                                    runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            Toast.makeText(getApplicationContext(), "Error processing response", Toast.LENGTH_SHORT).show();
+                                        }
+                                    });
+                                }
                             } else if (responseCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
                                 // Invalid username or password
                                 runOnUiThread(new Runnable() {
@@ -122,7 +157,8 @@ public class LoginActivity extends AppCompatActivity {
                                         editor.apply();
                                     }
                                 });
-                            } else {
+                            }
+                             else {
                                 // Handle other response codes
                                 // For example, server error
                                 runOnUiThread(new Runnable() {
@@ -186,6 +222,12 @@ public class LoginActivity extends AppCompatActivity {
         }
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putInt("attempts_left", attemptsLeft);
+        editor.apply();
+    }
+    private void saveToken(String token) {
+        // Save the token to SharedPreferences
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString("token", token);
         editor.apply();
     }
 }
