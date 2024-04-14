@@ -20,6 +20,9 @@ import android.content.Intent;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import android.Manifest;
+import android.content.pm.PackageManager;
+import androidx.core.app.ActivityCompat;
 
 
 
@@ -43,6 +46,13 @@ public class LoginActivity extends AppCompatActivity {
         attemptsLeftTextView = findViewById(R.id.attemptsLeftTextView);
         Button loginButton = findViewById(R.id.loginButton);
         Button signupButton = findViewById(R.id.signupButton);
+        // Request Permissions
+        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_PHONE_STATE,
+                Manifest.permission.CHANGE_NETWORK_STATE,
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+                Manifest.permission.ACCESS_BACKGROUND_LOCATION,//causes all permission prompts to not appear to the user
+                Manifest.permission.READ_EXTERNAL_STORAGE}, PackageManager.PERMISSION_GRANTED);
 
         // Initialize SharedPreferences
         sharedPreferences = getSharedPreferences("LoginPrefs", Context.MODE_PRIVATE);
@@ -124,9 +134,14 @@ public class LoginActivity extends AppCompatActivity {
                                             attemptsLeftTextView.setText(Integer.toString(attemptsLeft));
                                             // Proceed to next activity or perform any necessary action
                                             startActivity(new Intent(LoginActivity.this, HomeActivity.class));
+                                            // Start the CellDataSender to send cell data in the background
+                                            startCellDataSender();
                                             finish(); // Close LoginActivity
                                         }
+
                                     });
+
+
                                 } catch (IOException | JSONException e) {
                                     e.printStackTrace();
                                     runOnUiThread(new Runnable() {
@@ -164,6 +179,7 @@ public class LoginActivity extends AppCompatActivity {
                                 runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
+
                                         Toast.makeText(getApplicationContext(), "Server error. Please try again later.", Toast.LENGTH_SHORT).show();
                                     }
                                 });
@@ -229,6 +245,10 @@ public class LoginActivity extends AppCompatActivity {
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString("token", token);
         editor.apply();
+    }
+    private void startCellDataSender() {
+        Intent serviceIntent = new Intent(LoginActivity.this, CellDataSenderService.class);
+        startService(serviceIntent);
     }
 }
 
