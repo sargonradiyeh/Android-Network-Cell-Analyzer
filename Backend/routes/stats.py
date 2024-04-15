@@ -1,9 +1,8 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify
 from app import db
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from models.cell_data import CellData
-from sqlalchemy import func, extract
-from datetime import datetime, timedelta
+from sqlalchemy import func
 from sqlalchemy.sql import func
 
 stats_bp = Blueprint('stats', __name__)
@@ -51,7 +50,6 @@ def average_connectivity_time_per_network_type():
     result = [{'network_type': network, 'average_connectivity_time': avg_time} for network, avg_time in network_stats]
 
     return jsonify(result), 200
-
 
 
 @stats_bp.route('/average_signal_power_per_network_type', methods=['GET'])
