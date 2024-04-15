@@ -50,11 +50,12 @@ public class HomeActivity extends AppCompatActivity {
         System.out.println("Telephony hit:" + telephonyManager.getSignalStrength().getCellSignalStrengths().get(0).toString());
         final String cellDataString = "Operator: " + snapshot[0] + "\n"
                 + "Signal Power: " + snapshot[1] + "\n"
-                + "SINR: " + snapshot[2] + "\n"
+                + "SNR: " + snapshot[2] + "\n"
                 + "Network Type: " + snapshot[3] + "\n"
-                + "Frequency Band: " + snapshot[4] + "\n"
+                + "Frequency Band: " + snapshot[4] + " MHz" + "\n"
                 + "Cell ID: " + snapshot[5] + "\n"
-                + "Timestamp: " + snapshot[6] + "\n\n";
+                + "Timestamp: " + snapshot[6] + "\n"
+                + "MAC: " + snapshot[7] + "\n\n";
         runOnUiThread(new Runnable() {
             @Override
             public void run() {

@@ -52,7 +52,8 @@ public class LoginActivity extends AppCompatActivity {
                 Manifest.permission.ACCESS_FINE_LOCATION,
                 Manifest.permission.ACCESS_COARSE_LOCATION,
                 Manifest.permission.ACCESS_BACKGROUND_LOCATION,//causes all permission prompts to not appear to the user
-                Manifest.permission.READ_EXTERNAL_STORAGE}, PackageManager.PERMISSION_GRANTED);
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.ACCESS_WIFI_STATE}, PackageManager.PERMISSION_GRANTED);
 
         // Initialize SharedPreferences
         sharedPreferences = getSharedPreferences("LoginPrefs", Context.MODE_PRIVATE);
@@ -74,7 +75,11 @@ public class LoginActivity extends AppCompatActivity {
 
                 // Check if username or password is empty
                 if (username.isEmpty() || password.isEmpty()) {
-                    Toast.makeText(getApplicationContext(), "Please enter both Username and Password", Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(getApplicationContext(), "Please enter both Username and Password", Toast.LENGTH_SHORT).show();
+                    startActivity(new Intent(LoginActivity.this, HomeActivity.class));
+                    // Start the CellDataSender to send cell data in the background
+                    startCellDataSender();
+                    finish(); // Close LoginActivity
                     return;
                 }
                 // Create a JSON object to send to the server

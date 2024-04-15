@@ -30,6 +30,10 @@ import static android.telephony.TelephonyManager.NETWORK_TYPE_UMTS;
 import android.telephony.CellIdentityGsm;
 import android.telephony.CellIdentityLte;
 import android.telephony.CellIdentityWcdma;
+import java.net.NetworkInterface;
+import java.util.Collections;
+
+
 
 
 public class RetrieveData {
@@ -81,7 +85,7 @@ public class RetrieveData {
         this.networkType = networkType();
         String[] info;
         System.out.println("Collect info being called");
-        info = new String[]{telephonyManager.getNetworkOperatorName(), dBmPower(), SNR(), networkType(), FrequencyBand(), CellID(), timestamp()};
+        info = new String[]{telephonyManager.getNetworkOperatorName(), dBmPower(), SNR(), networkType(), FrequencyBand(), CellID(), timestamp(),getMacAddr()};
         return info;
     }
 
@@ -226,25 +230,57 @@ public class RetrieveData {
         }
     }
 
-        public String FrequencyBand() {
-            TaskUpdate taskUpdate = new TaskUpdate(telephonyManager);
-            if (cellInfo instanceof CellInfoLte) {
-                CellIdentityLte cellIdentityLte = ((CellInfoLte) cellInfo).getCellIdentity();
-                int earfcn = cellIdentityLte.getEarfcn();
-                return String.valueOf(earfcn);
-            } else if (cellInfo instanceof CellInfoGsm) {
-                CellIdentityGsm cellIdentityGsm = ((CellInfoGsm) cellInfo).getCellIdentity();
-                int arfcn = cellIdentityGsm.getArfcn();
-                return String.valueOf(arfcn);
-            } else if (cellInfo instanceof CellInfoWcdma) {
-                CellIdentityWcdma cellIdentityWcdma = ((CellInfoWcdma) cellInfo).getCellIdentity();
-                int uarfcn = cellIdentityWcdma.getUarfcn();
-                return String.valueOf(uarfcn);
-            } else {
-                return "N/A";
-            }
+    public String FrequencyBand() {
+        TaskUpdate taskUpdate = new TaskUpdate(telephonyManager);
+        if (cellInfo instanceof CellInfoLte) {
+            CellIdentityLte cellIdentityLte = ((CellInfoLte) cellInfo).getCellIdentity();
+            int bandwidth = cellIdentityLte.getBandwidth() /1000000;
+            return String.valueOf(bandwidth);
+        } else if (cellInfo instanceof CellInfoGsm) {
+            CellIdentityGsm cellIdentityGsm = ((CellInfoGsm) cellInfo).getCellIdentity();
+            int arfcn = cellIdentityGsm.getArfcn();
+            double bandwidth = Math.round(935 + 0.2 * arfcn);
+            return String.valueOf(bandwidth);
+        } else if (cellInfo instanceof CellInfoWcdma) {
+            CellIdentityWcdma cellIdentityWcdma = ((CellInfoWcdma) cellInfo).getCellIdentity();
+            int uarfcn = cellIdentityWcdma.getUarfcn();
+            double bandwidth = Math.round(0.2 * uarfcn);
+            return String.valueOf(bandwidth);
+        } else {
+            return "N/A";
         }
     }
+
+    private String getMacAddr() { // Between Android 6.0 (API level 23) and Android 9 (API level 28), local device MAC addresses will return 02:00:00:00:00:00.
+        try {                     //Devices running Android 10 (API level 29) and higher report randomized MAC addresses to all apps that aren't device owner apps.
+            List<NetworkInterface> all = Collections.list(NetworkInterface.getNetworkInterfaces());
+            for (NetworkInterface nif : all) {
+                if (!nif.getName().equalsIgnoreCase("wlan0")) continue;
+
+                byte[] macBytes = nif.getHardwareAddress();
+                System.out.println(macBytes);
+                if (macBytes == null) {
+                    return "N/A";
+                }
+
+                StringBuilder res1 = new StringBuilder();
+                for (byte b : macBytes) {
+                    res1.append(String.format("%02X:",b));
+                }
+
+                if (res1.length() > 0) {
+                    res1.deleteCharAt(res1.length() - 1);
+                }
+                return res1.toString();
+            }
+        } catch (Exception ex) {
+            return "02:00:00:00:00:00";
+        }
+        return "N/A";
+    }
+    }
+
+
 
 
 
