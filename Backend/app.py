@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from models.cell_data import CellData
 from extensions import db
 from flask_bcrypt import Bcrypt
@@ -24,10 +24,6 @@ app.register_blueprint(stats_bp, url_prefix='/stats')
 
 from models import cell_data, user
 migrate = Migrate(app, db)
-
-@app.route('/connected_clients', methods=['GET'])
-def get_connected_clients():
-    return jsonify({'count': socketio.connected_clients}), 200
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)
