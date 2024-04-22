@@ -6,6 +6,11 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 
 api_bp = Blueprint('api', __name__)
 
+def clean_data(value):
+    if value in [None, "", "null", "none", "None"]:
+        return "N/A"
+    return value
+
 @api_bp.route('/cell_data', methods=['POST'])
 @jwt_required()
 def add_cell_data():
@@ -17,30 +22,22 @@ def add_cell_data():
         
         current_user_id = get_jwt_identity()
         
-        signal_power = data['signal_power']
-        sinr = data['sinr']
-        network_type = data['network_type']
-        
-        if network_type in ['2G', '3G'] and signal_power == 'N/A':
-            signal_power = "n/a"  # Set to None to store NULL in the database
-        if network_type in ['2G', '3G'] and sinr == 'N/A':
-            sinr = "n/a"  # Set to None to store NULL in the database
-        
         new_cell_data = CellData(
             user_id=current_user_id,
-            operator=data['operator'],
-            signal_power=signal_power,
-            sinr=sinr,
-            network_type=network_type,
-            frequency_band=data['frequency_band'],
-            cell_id=data['cell_id'],
-            timestamp=datetime.strptime(data['timestamp'], '%d %b %Y %I:%M %p')
+            operator=clean_data(data['operator']),
+            signal_power=clean_data(data['signal_power']),
+            sinr=clean_data(data['sinr']),
+            network_type=clean_data(data['network_type']),
+            frequency_band=clean_data(data['frequency_band']),
+            cell_id=clean_data(data['cell_id']),
+            timestamp=datetime.strptime(clean_data(data['timestamp']), '%d %b %Y %I:%M %p')
         )
         
         db.session.add(new_cell_data)
         db.session.commit()
         
         return jsonify({'message': 'Cell data added successfully'}), 201
+        
     except ValueError as ve:
         db.session.rollback()
         print('Error adding cell data:', str(ve))
@@ -49,7 +46,6 @@ def add_cell_data():
         db.session.rollback()
         print('Error adding cell data:', str(e))
         return jsonify({'error': str(e)}), 500
-
 
 @api_bp.route('/cell_data', methods=['GET'])
 @jwt_required() 
