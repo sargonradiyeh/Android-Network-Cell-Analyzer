@@ -14,7 +14,7 @@
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
-        android:label="My Application"
+        android:label="Cell Tracker"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.MyApplication"
@@ -34,6 +34,17 @@
         <activity
             android:name=".HomeActivity"
             android:exported="true" />
+        <activity
+            android:name=".StatsActivity"
+            android:exported="true" />
+        <service
+            android:name=".CellDataSenderService"
+            android:enabled="true"
+            android:exported="false" />
+        <service
+            android:name=".WebSocketService"
+            android:enabled="true"
+            android:exported="false" />
     </application>
 
 </manifest>

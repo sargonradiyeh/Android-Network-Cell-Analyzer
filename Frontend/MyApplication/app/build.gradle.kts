@@ -37,4 +37,10 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
+    implementation("org.java-websocket:Java-WebSocket:1.5.2")
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
+    implementation("com.google.android.material:material:1.5.0")
+    implementation("com.github.JakeWharton:ViewPagerIndicator:2.4.1")
+    implementation("io.socket:socket.io-client:1.0.0")
+
 }

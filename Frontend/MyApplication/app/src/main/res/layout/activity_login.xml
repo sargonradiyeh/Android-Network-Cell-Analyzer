@@ -1,58 +1,158 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:gravity="center">
+    android:layout_height="match_parent">
+
 
     <TextView
-        android:id="@+id/welcomeLoginTextView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Network Cell Analyzer \n\nLogin"
-        android:textSize="24sp"
-        android:textColor="@color/black"
-        android:textStyle="bold"
+        android:id="@+id/login"
+        android:layout_width="100dp"
+        android:layout_height="66dp"
         android:gravity="center"
         android:paddingTop="16dp"
         android:paddingBottom="16dp"
-        android:layout_above="@id/usernameEditText" />
+        android:text="Login"
+        android:textColor="@color/black"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:layout_editor_absoluteY="374dp" />
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="270dp"
+        android:layout_height="214dp"
+        android:layout_marginTop="96dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.496"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/cell" />
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:cardBackgroundColor="@android:color/white"
+        app:cardCornerRadius="10dp"
+        app:cardElevation="20dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/imageView">
+
+        <!-- TextView inside the CardView -->
+        <TextView
+            android:id="@+id/welcomeLoginTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:color/holo_blue_dark"
+            android:backgroundTint="@android:color/holo_blue_dark"
+            android:gravity="center"
+            android:paddingTop="16dp"
+            android:paddingBottom="16dp"
+            android:text=" Network Cell Analyzer"
+            android:textColor="@color/white"
+            android:textSize="24sp"
+            android:textStyle="normal" />
+
+    </androidx.cardview.widget.CardView>
 
     <EditText
         android:id="@+id/usernameEditText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@id/welcomeLoginTextView"
-        android:hint="Username" />
+        android:layout_marginTop="136dp"
+        android:backgroundTint="@color/black"
+        android:hint="Username"
+        android:textColorHint="@color/black"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.496"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imageView" />
+
+    <ImageView
+        android:id="@+id/user"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_marginTop="460dp"
+        app:layout_constraintEnd_toStartOf="@+id/usernameEditText"
+        app:layout_constraintHorizontal_bias="1"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/user" />
 
     <EditText
         android:id="@+id/passwordEditText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:backgroundTint="@color/black"
         android:hint="Password"
-        android:inputType="textPassword" />
+        android:inputType="textPassword"
+        android:textColorHint="@color/black"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/usernameEditText" />
+
+    <ImageView
+        android:id="@+id/pass"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_marginTop="520dp"
+        app:layout_constraintEnd_toStartOf="@+id/passwordEditText"
+        app:layout_constraintHorizontal_bias="1"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/lock" />
 
     <TextView
         android:id="@+id/attemptsLeftTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="5" />
+        android:layout_marginTop="16dp"
+        android:text="5 attempts permitted before timeout"
+        android:textColor="@color/black"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/passwordEditText" />
 
     <Button
         android:id="@+id/loginButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Login" />
+        android:layout_marginTop="16dp"
+        android:backgroundTint="@android:color/holo_blue_dark"
+        android:text="Login"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/attemptsLeftTextView" />
 
     <Button
         android:id="@+id/signupButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Sign Up" />
+        android:layout_marginTop="16dp"
+        android:backgroundTint="@android:color/holo_blue_dark"
+        android:text="Sign Up"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/loginButton" />
 
+    <ImageView
+        android:id="@+id/design"
+        android:layout_width="503dp"
+        android:layout_height="357dp"
+        android:layout_marginBottom="4dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintDimensionRatio="H,1:1"
+        app:layout_constraintEnd_toStartOf="@+id/signupButton"
+        app:layout_constraintHorizontal_bias="0.471"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/signupButton"
+        app:layout_constraintVertical_bias="0.959"
+        app:srcCompat="@drawable/circles" />
 
-
-
-
-</LinearLayout>
-
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,6 +1,8 @@
 package com.example.myapplication;
 
 import android.os.Bundle;
+import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -34,24 +36,29 @@ public class LoginActivity extends AppCompatActivity {
     private int attemptsLeft;
     private CountDownTimer timer;
     private SharedPreferences sharedPreferences;
-    private int timerDuration = 300000; // Initial timer duration: 5 minutes
+    private int timerDuration = 150000;//300000; // Initial timer duration: 2.5 minutes
+    private Button loginButton;
 
     @Override
+    // Method executed when the activity is created
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
+        super.onCreate(savedInstanceState); // Call the superclass method to perform any initialization tasks
+        setContentView(R.layout.activity_login); // Set the activity content to an explicit view
 
+        // Initialize UI elements
         usernameEditText = findViewById(R.id.usernameEditText);
         passwordEditText = findViewById(R.id.passwordEditText);
         attemptsLeftTextView = findViewById(R.id.attemptsLeftTextView);
-        Button loginButton = findViewById(R.id.loginButton);
+        loginButton = findViewById(R.id.loginButton);
         Button signupButton = findViewById(R.id.signupButton);
+
         // Request Permissions
+        // Request necessary permissions from the user
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_PHONE_STATE,
                 Manifest.permission.CHANGE_NETWORK_STATE,
                 Manifest.permission.ACCESS_FINE_LOCATION,
                 Manifest.permission.ACCESS_COARSE_LOCATION,
-                Manifest.permission.ACCESS_BACKGROUND_LOCATION,//causes all permission prompts to not appear to the user
+                Manifest.permission.ACCESS_BACKGROUND_LOCATION,
                 Manifest.permission.READ_EXTERNAL_STORAGE,
                 Manifest.permission.ACCESS_WIFI_STATE}, PackageManager.PERMISSION_GRANTED);
 
@@ -62,23 +69,28 @@ public class LoginActivity extends AppCompatActivity {
         attemptsLeft = sharedPreferences.getInt("attempts_left", 5);
         attemptsLeftTextView.setText(Integer.toString(attemptsLeft));
 
-        // Start the timer only if attempts_left is 5
-        if (attemptsLeft == 5) {
-            startTimer();
+        // Retrieve timerDuration value from SharedPreferences, default to 2.5 minutes
+        timerDuration = sharedPreferences.getInt("timerDuration", 150000);
+
+        // Start the timer only if attempts_left is 0
+        if (attemptsLeft == 0) {
+            startTimer(); // Start a timer to limit login attempts
         }
 
+        // Set OnClickListener to the login button
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                // Execute when the login button is clicked
+
                 String username = usernameEditText.getText().toString();
                 String password = passwordEditText.getText().toString();
 
                 // Check if username or password is empty
                 if (username.isEmpty() || password.isEmpty()) {
                     //Toast.makeText(getApplicationContext(), "Please enter both Username and Password", Toast.LENGTH_SHORT).show();
-                    startActivity(new Intent(LoginActivity.this, HomeActivity.class));
-                    // Start the CellDataSender to send cell data in the background
-                    startCellDataSender();
+                    startActivity(new Intent(LoginActivity.this, HomeActivity.class)); // Redirect to home activity if username or password is empty
+                    startCellDataSender(); // Start background service to send cell data
                     finish(); // Close LoginActivity
                     return;
                 }
@@ -96,21 +108,23 @@ public class LoginActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         try {
-                            URL url = new URL("https://f287-194-146-32-177.ngrok-free.app/auth/login");
+                            URL url = new URL("https://jason.hydra-polaris.ts.net/auth/login");
                             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                             connection.setRequestMethod("POST");
                             connection.setRequestProperty("Content-Type", "application/json");
                             connection.setDoOutput(true);
+                            connection.setConnectTimeout(4000); // Set timeout to 4 seconds
                             DataOutputStream outputStream = new DataOutputStream(connection.getOutputStream());
                             outputStream.writeBytes(postData.toString());
                             outputStream.flush();
                             outputStream.close();
 
                             int responseCode = connection.getResponseCode();
+                            Log.d("LoginActivity", "Response Code: " + responseCode); // Log response code
+
                             if (responseCode == HttpURLConnection.HTTP_OK) {
                                 // Successful login
                                 try {
-                                    // Read token from response body
                                     InputStream inputStream = connection.getInputStream();
                                     BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
                                     StringBuilder response = new StringBuilder();
@@ -129,18 +143,17 @@ public class LoginActivity extends AppCompatActivity {
                                         @Override
                                         public void run() {
                                             Toast.makeText(getApplicationContext(), "Login successful!", Toast.LENGTH_SHORT).show();
-                                            // Store token securely
-                                            saveToken(token);
-                                            // Reset attempts_left and update SharedPreferences
-                                            attemptsLeft = 5;
+                                            saveToken(token); // Save the token securely
+                                            startWebSocketService(); // Start WebSocket service
+                                            attemptsLeft = 5; // Reset attempts_left counter
+                                            timerDuration = 150000; // Reset timerDuration
                                             SharedPreferences.Editor editor = sharedPreferences.edit();
                                             editor.putInt("attempts_left", attemptsLeft);
+                                            editor.putInt("timerDuration", timerDuration);
                                             editor.apply();
                                             attemptsLeftTextView.setText(Integer.toString(attemptsLeft));
-                                            // Proceed to next activity or perform any necessary action
-                                            startActivity(new Intent(LoginActivity.this, HomeActivity.class));
-                                            // Start the CellDataSender to send cell data in the background
-                                            startCellDataSender();
+                                            startCellDataSender(); // Start background service to send cell data
+                                            startActivity(new Intent(LoginActivity.this, HomeActivity.class)); // Proceed to next activity
                                             finish(); // Close LoginActivity
                                         }
 
@@ -162,25 +175,23 @@ public class LoginActivity extends AppCompatActivity {
                                     @Override
                                     public void run() {
                                         Toast.makeText(getApplicationContext(), "Invalid username or password", Toast.LENGTH_SHORT).show();
-                                        attemptsLeft--;
-                                        attemptsLeftTextView.setText(Integer.toString(attemptsLeft));
-                                        if (attemptsLeft == 0) {
-                                            loginButton.setEnabled(false);
-                                        } else {
-                                            // Double the timer duration for the next attempt
-                                            timerDuration *= 2;
-                                            startTimer();
+                                        if (attemptsLeft>0){
+                                            attemptsLeft--;
                                         }
-                                        // Update SharedPreferences
+                                        attemptsLeftTextView.setText(Integer.toString(attemptsLeft));
+                                        Log.d("TimerValue", String.valueOf(timer));
+                                        if (attemptsLeft == 0 && timer == null) {
+                                            loginButton.setEnabled(false);
+                                            startTimer(); // Start the timer
+                                        }
                                         SharedPreferences.Editor editor = sharedPreferences.edit();
                                         editor.putInt("attempts_left", attemptsLeft);
                                         editor.apply();
                                     }
                                 });
                             }
-                             else {
-                                // Handle other response codes
-                                // For example, server error
+                            else {
+                                // Handles other response codes as server error
                                 runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
@@ -203,15 +214,19 @@ public class LoginActivity extends AppCompatActivity {
                 }).start();
             }
         });
+
+        // Set OnClickListener to the signup button
         signupButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Start SignupActivity
-                Intent intent = new Intent(LoginActivity.this, SignupActivity.class);
-                startActivity(intent);
+                // Execute when the signup button is clicked
+                startActivity(new Intent(LoginActivity.this, SignupActivity.class)); // Start the SignupActivity
             }
         });
     }
+
+
+
 
 
     // Method to start the timer
@@ -219,16 +234,27 @@ public class LoginActivity extends AppCompatActivity {
         timer = new CountDownTimer(timerDuration, 1000) {
             @Override
             public void onTick(long millisUntilFinished) {
-                // Timer is ticking
+                long minutesLeft = millisUntilFinished / 60000;
+                long secondsLeft = (millisUntilFinished % 60000) / 1000;
+                if (minutesLeft == 0 && secondsLeft == 0) {
+                    attemptsLeftTextView.setText(Integer.toString(attemptsLeft));
+                } else {
+                    attemptsLeftTextView.setText(attemptsLeft + "\nTime Left: " + minutesLeft + ":" + String.format("%02d", secondsLeft));
+                    attemptsLeftTextView.setGravity(Gravity.CENTER);
+                }
             }
 
             @Override
             public void onFinish() {
-                // Timer finished, reset attempts_left to 5 and update SharedPreferences
+                // Timer finished, reset attempts_left to , double timerDuration, and update SharedPreferences
+                timer = null; // Set timer to null when finished
                 attemptsLeft = 5;
+                timerDuration = timerDuration * 2;
                 SharedPreferences.Editor editor = sharedPreferences.edit();
                 editor.putInt("attempts_left", attemptsLeft);
+                editor.putInt("timerDuration", timerDuration);
                 editor.apply();
+                loginButton.setEnabled(true);
                 attemptsLeftTextView.setText(Integer.toString(attemptsLeft));
             }
         }.start();
@@ -236,24 +262,38 @@ public class LoginActivity extends AppCompatActivity {
 
     // Override onDestroy to cancel the timer and save the attempts_left value
     @Override
+    // Method executed when the activity is destroyed
     protected void onDestroy() {
-        super.onDestroy();
+        super.onDestroy(); // Call the superclass method to perform any necessary cleanup tasks
         if (timer != null) {
-            timer.cancel();
+            timer.cancel(); // Cancel the timer if it exists
         }
+        // Update the attempts_left value in SharedPreferences
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putInt("attempts_left", attemptsLeft);
         editor.apply();
     }
+
+    // Method to save the token securely in SharedPreferences
     private void saveToken(String token) {
         // Save the token to SharedPreferences
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString("token", token);
         editor.apply();
     }
-    private void startCellDataSender() {
-        Intent serviceIntent = new Intent(LoginActivity.this, CellDataSenderService.class);
-        startService(serviceIntent);
-    }
-}
 
+    // Method to start the background service for sending cell data
+    private void startCellDataSender() {
+        // Create an intent to start the CellDataSenderService
+        Intent serviceIntent = new Intent(LoginActivity.this, CellDataSenderService.class);
+        startService(serviceIntent); // Start the service
+    }
+
+    // Method to start the WebSocket service
+    private void startWebSocketService() {
+        // Create an intent to start the WebSocketService
+        Intent serviceIntent = new Intent(LoginActivity.this, WebSocketService.class);
+        startService(serviceIntent); // Start the service
+    }
+
+}

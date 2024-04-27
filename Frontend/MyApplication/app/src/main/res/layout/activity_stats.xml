@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".StatsActivity">
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@id/resultsTextView"
+            android:layout_above="@id/sendButton">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/resultsTextView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="60dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="16dp"
+                    android:text=""
+                    android:textSize="16sp" />
+
+
+                <com.github.mikephil.charting.charts.BarChart
+                    android:id="@+id/operatorChart"
+                    android:layout_width="match_parent"
+                    android:layout_height="250dp"
+                    android:layout_marginTop="16dp"/>
+
+                <com.github.mikephil.charting.charts.BarChart
+                    android:id="@+id/networkChart"
+                    android:layout_width="match_parent"
+                    android:layout_height="250dp"
+                    android:layout_marginTop="16dp"/>
+
+                <com.github.mikephil.charting.charts.BarChart
+                    android:id="@+id/powerChart"
+                    android:layout_width="match_parent"
+                    android:layout_height="250dp"
+                    android:layout_marginTop="16dp"/>
+
+                <com.github.mikephil.charting.charts.BarChart
+                    android:id="@+id/deviceChart"
+                    android:layout_width="match_parent"
+                    android:layout_height="250dp"
+                    android:layout_marginTop="16dp"/>
+
+                <com.github.mikephil.charting.charts.BarChart
+                    android:id="@+id/snrSINRChart"
+                    android:layout_width="match_parent"
+                    android:layout_height="250dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="95dp"
+                    />
+            </LinearLayout>
+        </ScrollView>
+        <Button
+            android:id="@+id/sendButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Request Data"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.498"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/linearLayout"
+            android:layout_marginBottom="4dp"
+            app:layout_constraintVertical_bias="0.953" />
+
+        <Button
+            android:id="@+id/startDateButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="24dp"
+            android:layout_marginTop="460dp"
+            android:text="Select Start Date"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/endDateButton"
+            app:layout_constraintHorizontal_bias="0.216"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.834" />
+
+        <Button
+            android:id="@+id/endDateButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="28dp"
+            android:layout_marginTop="460dp"
+            android:text="Select End Date"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintHorizontal_bias="0.716"
+            app:layout_constraintVertical_bias="0.834" />
+        <Button
+            android:id="@+id/returnButton"
+            android:layout_width="66dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="4dp"
+            android:backgroundTint="@android:color/holo_blue_dark"
+            android:drawableLeft="@drawable/ic_arrow_back"
+            android:text="Back"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</RelativeLayout>

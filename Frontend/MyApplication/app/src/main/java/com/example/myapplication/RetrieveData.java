@@ -32,76 +32,95 @@ import android.telephony.CellIdentityLte;
 import android.telephony.CellIdentityWcdma;
 import java.net.NetworkInterface;
 import java.util.Collections;
+import java.util.Locale;
 
 
 
 
 public class RetrieveData {
-    public TelephonyManager telephonyManager;
-    public List<CellInfo> cellInfoList;
-    public CellInfo cellInfo;
+    public TelephonyManager tManager;
+    public List<CellInfo> cellinfolist;
+    public CellInfo cellinfo;
     public SignalStrength signalStrength;
     public ServiceState serviceState;
-    public CellIdentity cellIdentity;
-    public String networkType;
-    public CellSignalStrengthLte cellSignalStrengthLte;
-    public CellSignalStrengthWcdma cellSignalStrengthWcdma;
-    public CellSignalStrengthGsm cellSignalStrengthGsm;
+    public CellIdentity cellId;
+    public String network;
+    public CellSignalStrengthLte strengthLte;
+    public CellSignalStrengthWcdma strengthWcdma;
+    public CellSignalStrengthGsm strengthGsm;
 
     @SuppressLint({"NewApi", "MissingPermission"})
-    public RetrieveData(TelephonyManager TM) {
+    /*
+     * Constructor for RetrieveData class.
+     * Initializes necessary instances for retrieving cell data.
+     *
+     * @param TM TelephonyManager instance used to access telephony services
+     */
+    public RetrieveData(TelephonyManager TM) { //input: TelephonyManager TM
         while (true) {
             try {
-                //necessary instances
-                this.telephonyManager = TM;
-                this.cellInfoList = telephonyManager.getAllCellInfo();
-                this.cellInfo = cellInfoList.get(0);
-                this.signalStrength = telephonyManager.getSignalStrength();
-                this.serviceState = telephonyManager.getServiceState();
-                this.cellIdentity = cellInfo.getCellIdentity();
-                for (final CellInfo infoLte : cellInfoList) {
+                // Initialize necessary instances
+                this.tManager = TM; // Initialize TelephonyManager instance
+                this.cellinfolist = tManager.getAllCellInfo(); // Get list of all cell info
+                this.cellinfo = cellinfolist.get(0); // Get the first cell info
+                this.signalStrength = tManager.getSignalStrength(); // Get signal strength
+                this.serviceState = tManager.getServiceState(); // Get service state
+                this.cellId = cellinfo.getCellIdentity(); // Get cell identity
+
+                // Loop through cell info list to find registered LTE cell and get signal strength
+                for (final CellInfo infoLte : cellinfolist) {
                     if (infoLte instanceof CellInfoLte && infoLte.isRegistered()) {
-                        this.cellSignalStrengthLte = ((CellInfoLte) infoLte).getCellSignalStrength();
+                        this.strengthLte = ((CellInfoLte) infoLte).getCellSignalStrength();
                     }
                 }
-                for (final CellInfo infoGsm : cellInfoList) {
+
+                // Loop through cell info list to find registered GSM cell and get signal strength
+                for (final CellInfo infoGsm : cellinfolist) {
                     if (infoGsm instanceof CellInfoGsm && infoGsm.isRegistered()) {
-                        this.cellSignalStrengthGsm = ((CellInfoGsm) infoGsm).getCellSignalStrength();
+                        this.strengthGsm = ((CellInfoGsm) infoGsm).getCellSignalStrength();
                     }
                 }
-                for (final CellInfo infoWcdma : cellInfoList) {
+
+                // Loop through cell info list to find registered WCDMA cell and get signal strength
+                for (final CellInfo infoWcdma : cellinfolist) {
                     if (infoWcdma instanceof CellInfoWcdma && infoWcdma.isRegistered()) {
-                        this.cellSignalStrengthWcdma = ((CellInfoWcdma) infoWcdma).getCellSignalStrength();
+                        this.strengthWcdma = ((CellInfoWcdma) infoWcdma).getCellSignalStrength();
                     }
                 }
-                break;
+                break; // Exit the loop after successfully initializing all instances
             } catch (Exception e) {
-                System.out.println("Nope");
+                // Catch any exceptions and continue looping
             }
         }
     }
-    public String[] collectinfo() {
-        TaskUpdate taskUpdate = new TaskUpdate(telephonyManager);
-        this.networkType = networkType();
+    public String[] collectinfo() { //Function that
+        TaskUpdate taskUpdate = new TaskUpdate(tManager);
+        this.network = findnetworktype();
         String[] info;
         System.out.println("Collect info being called");
-        info = new String[]{telephonyManager.getNetworkOperatorName(), dBmPower(), SNR(), networkType(), FrequencyBand(), CellID(), timestamp(),getMacAddr()};
+        info = new String[]{tManager.getNetworkOperatorName(), PowerdB(),
+                SNR(), findnetworktype(), FrequencyBand(),
+                CellID(), timestamp(), macAddr()};
         return info;
     }
 
-
-
     @SuppressLint("MissingPermission")
 
-    public String networkType() {
+    /*
+     * Method to determine the network type based on the data network type.
+     *
+     * @return String representing the network type (2G, 3G, 4G, or N/A if unknown)
+     */
+    public String findnetworktype() {
         try {
-            switch (telephonyManager.getDataNetworkType()) {
+            // Switch statement to determine network type based on data network type
+            switch (tManager.getDataNetworkType()) {
                 case NETWORK_TYPE_EDGE:
                 case NETWORK_TYPE_GPRS:
                 case NETWORK_TYPE_CDMA:
                 case NETWORK_TYPE_IDEN:
                 case NETWORK_TYPE_1xRTT:
-                    return ("2G");
+                    return ("2G"); // Return 2G for EDGE, GPRS, CDMA, IDEN, and 1xRTT
                 case NETWORK_TYPE_UMTS:
                 case NETWORK_TYPE_HSDPA:
                 case NETWORK_TYPE_HSPA:
@@ -109,178 +128,238 @@ public class RetrieveData {
                 case NETWORK_TYPE_EVDO_0:
                 case NETWORK_TYPE_EVDO_A:
                 case NETWORK_TYPE_EVDO_B:
-                    return ("3G");
+                    return ("3G"); // Return 3G for UMTS, HSDPA, HSPA, HSPAP, EVDO_0, EVDO_A, and EVDO_B
                 case NETWORK_TYPE_LTE:
-                    return ("4G");
+                    return ("4G"); // Return 4G for LTE
                 default:
-                    return ("N/A");
+                    return ("N/A"); // Return N/A for other network types
             }
         } catch (Exception e) {
-            System.out.println(e.toString());
-            return "N/A";
+            System.out.println(e.toString()); // Print exception message
+            return "N/A"; // Return N/A if an exception occurs
         }
     }
+
 
     //returns cell identity details in function of what networkType() returned
+    /*
+     * Method to determine the Cell ID based on the network type.
+     *
+     * return String representing the Cell ID (or "N/A" if unknown)
+     */
     public String CellID() {
         try {
-            switch (networkType) {
+            // Switch statement to determine Cell ID based on network type
+            switch (network) {
                 case "2G":
-                    return GSMCID();
+                    return GSMCID(); // Return GSM Cell ID for 2G network
                 case "3G":
-                    return WCDMACID();
+                    return WCDMACID(); // Return WCDMA Cell ID for 3G network
                 case "4G":
-                    return LTECID();
+                    return LTECID(); // Return LTE Cell ID for 4G network
                 default:
-                    return "N/A";
+                    return "N/A"; // Return N/A for unknown network types
             }
         } catch (Exception e) {
-            System.out.println(e.toString());
-            return "N/A";
+            System.out.println(e.toString()); // Print exception message
+            return "N/A"; // Return N/A if an exception occurs
         }
     }
 
-    public String LTECID() {
-        try {
-            String string = cellIdentity.toString();
-            int mci = string.indexOf("mCi");
-            int mpci = string.indexOf("mPci");
-            //int mtac = string.indexOf("mTac");
-            return string.substring(mci + 4, mpci - 1);//"PCI:"+string.substring(mpci+5,mtac-1)
-        } catch (Exception e) {
-            System.out.println(e.toString());
-            return "N/A";
-        }
 
-    }
 
+    /*
+     * Method to extract GSM Cell ID from cellIdentity.
+     *
+     * return String representing the GSM Cell ID (or "N/A" if unknown)
+     */
     public String GSMCID() {
         try {
-            String string = cellIdentity.toString();
+            // Convert cellIdentity to string
+            String string = cellId.toString();
+            // Find index of "mCid" and "mArfcn" in the string
             int mcid = string.indexOf("mCid");
             int marfcn = string.indexOf("mArfcn");
+            // Extract GSM Cell ID substring from the string
             return string.substring(mcid + 5, marfcn - 1);
         } catch (Exception e) {
-            System.out.println(e.toString());
-            return "N/A";
+            System.out.println(e.toString()); // Print exception message
+            return "N/A"; // Return N/A if an exception occurs
         }
     }
 
+    /*
+     * Method to extract WCDMA Cell ID from cellIdentity.
+     *
+     * return String representing the WCDMA Cell ID (or "N/A" if unknown)
+     */
     public String WCDMACID() {
         try {
-            String string = cellIdentity.toString();
+            // Convert cellIdentity to string
+            String string = cellId.toString();
+            // Find index of "mCid" and "mPsc" in the string
             int mcid = string.indexOf("mCid");
             int mpsc = string.indexOf("mPsc");
+            // Extract WCDMA Cell ID substring from the string
             return string.substring(mcid + 5, mpsc - 1);
         } catch (Exception e) {
-            System.out.println(e.toString());
-            return "N/A";
+            System.out.println(e.toString()); // Print exception message
+            return "N/A"; // Return N/A if an exception occurs
         }
     }
 
+    /*
+     * Method to extract LTE Cell ID from cellIdentity.
+     *
+     * return String representing the LTE Cell ID (or "N/A" if unknown)
+     */
+    public String LTECID() {
+        try {
+            // Convert cellIdentity to string
+            String string = cellId.toString();
+            // Find index of "mCi" and "mPci" in the string
+            int mci = string.indexOf("mCi");
+            int mpci = string.indexOf("mPci");
+            // Extract LTE Cell ID substring from the string
+            return string.substring(mci + 4, mpci - 1);
+        } catch (Exception e) {
+            System.out.println(e.toString()); // Print exception message
+            return "N/A"; // Return N/A if an exception occurs
+        }
+    }
+
+    /*
+     * Method to get current timestamp.
+     *
+     * return String representing the current timestamp (or "N/A" if unknown)
+     */
     public String timestamp() {
         try {
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            String formattedDate = dateFormat.format(new Date());
-            return formattedDate;
+            // Create SimpleDateFormat object with desired date format
+            SimpleDateFormat dateForm = new SimpleDateFormat("dd MMM yyyy hh:mm a", Locale.ENGLISH);
+            // Get current date and format it as a string
+            String formattedDate = dateForm.format(new Date());
+            return formattedDate; // Return formatted date string
         } catch (Exception e) {
-            System.out.println(e.toString());
-            return "N/A";
+            System.out.println(e.toString()); // Print exception message
+            return "N/A"; // Return N/A if an exception occurs
         }
     }
 
-
-    //power in dbm for 2g 3g 4g
-    public String dBmPower() {
-        TaskUpdate taskUpdate = new TaskUpdate(telephonyManager);
-
+    /*
+     * Method to get the Signal-to-Noise Ratio (SNR) for LTE networks.
+     *
+     * return String representing the SNR (or "N/A" if unknown or not applicable)
+     */
+    public String SNR() {
         try {
-            System.out.println("WE ARE HERE");
-            System.out.println(cellInfo);
-            switch (networkType) {
-                case "2G":
-                    return String.valueOf(cellSignalStrengthGsm.getDbm());
-                case "3G":
-                    return String.valueOf(cellSignalStrengthWcdma.getDbm());
-                case "4G":
-                    return String.valueOf(cellSignalStrengthLte.getDbm());
-                default:
-                    return "N/A";
-            }
-        } catch (Exception e){
-            System.out.println(e.toString());
-            return "N/A";
-        }
-    }
-
-    //SNR only for LTE
-    public String SNR(){
-        try {
-            if (networkType == "4G") {
-                String string = signalStrength.toString();
-                int rssnr = string.indexOf("rssnr");
-                int cqi = string.indexOf("cqi");
+            if ("4G".equals(network)) { // Check if network type is LTE
+                String string = signalStrength.toString(); // Convert signal strength to string
+                int rssnr = string.indexOf("rssnr"); // Find index of "rssnr" in the string
+                int cqi = string.indexOf("cqi"); // Find index of "cqi" in the string
+                // Extract SNR substring from the string and return it
                 return string.substring(rssnr + 6, cqi - 1);
             } else {
-                return "N/A";
+                return "N/A"; // Return "N/A" if network type is not LTE
             }
-        } catch(Exception e) {
-            System.out.println(e.toString());
-            return "N/A";
+        } catch (Exception e) {
+            System.out.println(e.toString()); // Print exception message
+            return "N/A"; // Return "N/A" if an exception occurs
         }
     }
+    /*
+     * Method to get the frequency band of the network.
+     *
+     * return String representing the frequency band (or "N/A" if unknown)
+     */
+    public String FrequencyBand() { //https://www.frequencycheck.com/carriers/touch-lebanon
+        TaskUpdate taskUpdate = new TaskUpdate(tManager); // Initialize TaskUpdate object
 
-    public String FrequencyBand() {
-        TaskUpdate taskUpdate = new TaskUpdate(telephonyManager);
-        if (cellInfo instanceof CellInfoLte) {
-            CellIdentityLte cellIdentityLte = ((CellInfoLte) cellInfo).getCellIdentity();
-            int bandwidth = cellIdentityLte.getBandwidth() /1000000;
-            return String.valueOf(bandwidth);
-        } else if (cellInfo instanceof CellInfoGsm) {
-            CellIdentityGsm cellIdentityGsm = ((CellInfoGsm) cellInfo).getCellIdentity();
-            int arfcn = cellIdentityGsm.getArfcn();
-            double bandwidth = Math.round(935 + 0.2 * arfcn);
-            return String.valueOf(bandwidth);
-        } else if (cellInfo instanceof CellInfoWcdma) {
-            CellIdentityWcdma cellIdentityWcdma = ((CellInfoWcdma) cellInfo).getCellIdentity();
-            int uarfcn = cellIdentityWcdma.getUarfcn();
-            double bandwidth = Math.round(0.2 * uarfcn);
-            return String.valueOf(bandwidth);
+        if (cellinfo instanceof CellInfoLte) { // Check if the cell info is for LTE network
+            CellIdentityLte cellIdentityLte = ((CellInfoLte) cellinfo).getCellIdentity();
+            int bandwidth = cellIdentityLte.getBandwidth() / 1000000; // Get bandwidth in MHz
+            return String.valueOf(bandwidth); // Return bandwidth as string
+        } else if (cellinfo instanceof CellInfoGsm) { // Check if the cell info is for GSM network
+            CellIdentityGsm cellIdentityGsm = ((CellInfoGsm) cellinfo).getCellIdentity();
+            int arfcn = cellIdentityGsm.getArfcn(); // Get Absolute Radio Frequency Channel Number (ARFCN)
+            double bandwidth = Math.round(900 + 0.2 * arfcn); // Calculate bandwidth using ARFCN formula for GSM https://www.sqimway.com/gsm_band.php
+            return String.valueOf(bandwidth); // Return bandwidth as string
+        } else if (cellinfo instanceof CellInfoWcdma) { // Check if the cell info is for WCDMA network
+            CellIdentityWcdma cellIdentityWcdma = ((CellInfoWcdma) cellinfo).getCellIdentity();
+            int uarfcn = cellIdentityWcdma.getUarfcn(); // Get UTRA Absolute Radio Frequency Channel Number (UARFCN)
+            double bandwidth = Math.round(0.2 * uarfcn); // Calculate bandwidth using UARFCN formula for WCDMA //https://www.sqimway.com/umts_band.php
+            return String.valueOf(bandwidth); // Return bandwidth as string
         } else {
-            return "N/A";
+            return "N/A"; // Return "N/A" if network type is unknown
         }
     }
 
-    private String getMacAddr() { // Between Android 6.0 (API level 23) and Android 9 (API level 28), local device MAC addresses will return 02:00:00:00:00:00.
+
+    /*
+     * Method to get the signal power in dBm for 2g 3g 4g.
+     *
+     * return String representing the signal power in dBm (or "N/A" if unknown)
+     */
+    public String PowerdB() {
+        TaskUpdate taskUpdate = new TaskUpdate(tManager); // Initialize TaskUpdate object
+
+        try {
+            // Print debug information
+            System.out.println("WE ARE HERE");
+            System.out.println(cellinfo);
+
+            // Determine network type and return corresponding signal power value
+            switch (network) {
+                case "2G":
+                    return String.valueOf(strengthGsm.getDbm());
+                case "3G":
+                    return String.valueOf(strengthWcdma.getDbm());
+                case "4G":
+                    return String.valueOf(strengthLte.getDbm());
+                default:
+                    return "N/A"; // Return "N/A" if network type is unknown
+            }
+        } catch (Exception e) {
+            System.out.println(e.toString()); // Print exception message
+            return "N/A"; // Return "N/A" if an exception occurs
+        }
+    }
+    /*
+     * Method to get the MAC address of the device.
+     *
+     * return String representing the MAC address (or "N/A" if not available)
+     */
+    private String macAddr() { // Between Android 6.0 (API level 23) and Android 9 (API level 28), local device MAC addresses will return 02:00:00:00:00:00.
         try {                     //Devices running Android 10 (API level 29) and higher report randomized MAC addresses to all apps that aren't device owner apps.
             List<NetworkInterface> all = Collections.list(NetworkInterface.getNetworkInterfaces());
             for (NetworkInterface nif : all) {
                 if (!nif.getName().equalsIgnoreCase("wlan0")) continue;
 
-                byte[] macBytes = nif.getHardwareAddress();
-                System.out.println(macBytes);
-                if (macBytes == null) {
+                byte[] Bytes = nif.getHardwareAddress();
+                System.out.println(Bytes);
+                if (Bytes == null) {
                     return "N/A";
                 }
 
                 StringBuilder res1 = new StringBuilder();
-                for (byte b : macBytes) {
+                for (byte b : Bytes) {
                     res1.append(String.format("%02X:",b));
                 }
 
                 if (res1.length() > 0) {
                     res1.deleteCharAt(res1.length() - 1);
                 }
-                return res1.toString();
+                return res1.toString(); //return MAC Address string
             }
         } catch (Exception ex) {
-            return "02:00:00:00:00:00";
+            return "02:00:00:00:00:00";// if exception return
         }
-        return "N/A";
+        return "02:00:00:00:00:00"; // if MAC address is not found/security constraints
     }
-    }
 
 
 
 
 
+
+}
