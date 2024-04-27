@@ -22,6 +22,7 @@ def daily_or_total_avg(query, start_date, end_date, group_by_fields):
         )
     return query.group_by(*group_by_fields).all()
 
+
 @stats_bp.route('/average_connectivity_time_per_operator', methods=['GET'])
 @jwt_required()
 def average_connectivity_time_per_operator():
@@ -31,27 +32,36 @@ def average_connectivity_time_per_operator():
 
     base_query = db.session.query(
         CellData.operator,
-        func.timestampdiff(text('SECOND'), func.lag(CellData.timestamp).over(partition_by=[CellData.operator]), CellData.timestamp).label('diff')
+        func.timestampdiff(
+            text('SECOND'), 
+            func.lag(CellData.timestamp).over(
+                partition_by=[CellData.operator],
+                order_by=CellData.timestamp
+            ), 
+            CellData.timestamp
+        ).label('diff')
     ).filter(CellData.user_id == current_user_id)
 
     if start_date and end_date:
         base_query = base_query.filter(CellData.timestamp >= start_date, CellData.timestamp <= end_date)
 
+    subquery = base_query.subquery()
     operator_stats_query = db.session.query(
-        CellData.operator,
-        func.avg(base_query.subquery().c.diff).label('avg_time')
-    )
+        subquery.c.operator,
+        func.avg(subquery.c.diff).label('avg_time')
+    ).group_by(subquery.c.operator) 
 
-    group_by_fields = [CellData.operator]
+    operator_stats = operator_stats_query.all()
 
-    operator_stats = daily_or_total_avg(operator_stats_query, start_date, end_date, group_by_fields)
+    total_avg_time = sum([stat[1] for stat in operator_stats if stat[1] is not None])
 
     result = [{
         'operator': operator,
-        'average_connectivity_time': max(avg_time, 0) if avg_time else 0
+        'average_connectivity_percentage': (avg_time / total_avg_time * 100) if avg_time is not None and total_avg_time > 0 else 0
     } for operator, avg_time in operator_stats]
 
     return jsonify(result), 200
+
 
 @stats_bp.route('/average_connectivity_time_per_network_type', methods=['GET'])
 @jwt_required()
@@ -104,7 +114,7 @@ def average_signal_power_per_network_type():
 
     stats = daily_or_total_avg(query, start_date, end_date, [CellData.network_type])
     
-    result = [{'network_type': network, 'average_signal_power': avg_power} for network, avg_power in stats]
+    result = [{'network_type': network, 'average_signal_power1': avg_power} for network, avg_power in stats]
     return jsonify(result), 200
 
 @stats_bp.route('/average_signal_power_per_device', methods=['GET'])
@@ -127,7 +137,7 @@ def average_signal_power_per_device():
 
     stats = daily_or_total_avg(query, start_date, end_date, [CellData.cell_id])
     
-    result = [{'device': device, 'average_signal_power': avg_power} for device, avg_power in stats]
+    result = [{'device': device, 'average_signal_power2': avg_power} for device, avg_power in stats]
     return jsonify(result), 200
 
 @stats_bp.route('/average_snr_or_sinr_per_network_type', methods=['GET'])
