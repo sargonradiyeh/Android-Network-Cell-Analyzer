@@ -6,34 +6,46 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 
 api_bp = Blueprint('api', __name__)
 
+def clean_data(value):
+    if value in [None, "", "null", "none", "None"]:
+        return "N/A"
+    return value
+
 @api_bp.route('/cell_data', methods=['POST'])
 @jwt_required()
 def add_cell_data():
-    data = request.json
-    current_user_id = get_jwt_identity()
-
-    new_cell_data = CellData(
-        user_id=current_user_id,
-        operator=data['operator'],
-        signal_power=data['signal_power'],
-        sinr=data['sinr'],
-        network_type=data['network_type'],
-        frequency_band=data['frequency_band'],
-        cell_id=data['cell_id'],
-        timestamp=datetime.strptime(data['timestamp'], '%d %b %Y %I:%M %p') 
-    )
-
-    db.session.add(new_cell_data)
-
     try:
+        data = request.json
+        required_fields = ['operator', 'signal_power', 'sinr', 'network_type', 'frequency_band', 'cell_id', 'timestamp']
+        if not all(field in data for field in required_fields):
+            raise ValueError("Missing required field(s)")
+        
+        current_user_id = get_jwt_identity()
+        
+        new_cell_data = CellData(
+            user_id=current_user_id,
+            operator=clean_data(data['operator']),
+            signal_power=clean_data(data['signal_power']),
+            sinr=clean_data(data['sinr']),
+            network_type=clean_data(data['network_type']),
+            frequency_band=clean_data(data['frequency_band']),
+            cell_id=clean_data(data['cell_id']),
+            timestamp=datetime.strptime(clean_data(data['timestamp']), '%d %b %Y %I:%M %p')
+        )
+        
+        db.session.add(new_cell_data)
         db.session.commit()
+        
         return jsonify({'message': 'Cell data added successfully'}), 201
+        
+    except ValueError as ve:
+        db.session.rollback()
+        print('Error adding cell data:', str(ve))
+        return jsonify({'error': str(ve)}), 422
     except Exception as e:
         db.session.rollback()
+        print('Error adding cell data:', str(e))
         return jsonify({'error': str(e)}), 500
-    finally:
-        db.session.close()
-
 
 @api_bp.route('/cell_data', methods=['GET'])
 @jwt_required() 
@@ -52,5 +64,3 @@ def get_all_cell_data():
     } for record in cell_data_records]
 
     return jsonify(result), 200
-
-# add routes for stats here

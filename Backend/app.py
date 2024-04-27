@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, jsonify, request
 from models.cell_data import CellData
 from extensions import db
 from flask_bcrypt import Bcrypt
@@ -6,6 +6,8 @@ from flask_jwt_extended import JWTManager
 from routes.api import api_bp
 from routes.auth import auth_bp
 from flask_migrate import Migrate
+from routes.stats import stats_bp
+from utils.connectedClients import socketio
 
 app = Flask(__name__)
 app.config.from_pyfile('config.py')
@@ -13,44 +15,15 @@ app.config.from_pyfile('config.py')
 db.init_app(app)
 bcrypt = Bcrypt(app)
 jwt = JWTManager(app)
+socketio.init_app(app)
 
-app.register_blueprint(auth_bp, url_prefix='/api/auth')
+app.register_blueprint(auth_bp, url_prefix='/auth')
 app.register_blueprint(api_bp, url_prefix='/api')
+app.register_blueprint(stats_bp, url_prefix='/stats')
+
 
 from models import cell_data, user
 migrate = Migrate(app, db)
-
-def calculate_average_connectivity_time(operator):
-    cell_data_records = CellData.query.filter_by(operator=operator).all()
-
-    total_connectivity_time = 0
-    num_records = len(cell_data_records)
-
-    for record in cell_data_records:
-        total_connectivity_time += record.timestamp.timestamp()
-
-    if num_records > 0:
-        average_connectivity_time = total_connectivity_time / num_records
-    else:
-        average_connectivity_time = 0
-
-    return average_connectivity_time
-
-def calculate_avg_signal_power_per_network_type(network_type):
-    cell_data_records = CellData.query.filter_by(network_type=network_type).all()
-
-    total_signal_power = 0
-    num_records = len(cell_data_records)
-
-    for record in cell_data_records:
-        total_signal_power += record.signal_power
-
-    if num_records > 0:
-        average_signal_power = total_signal_power / num_records
-    else:
-        average_signal_power = 0
-
-    return average_signal_power
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)
