@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Network Cell Analyzer Dashboard</title>
+
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+ body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 20px;
+  }
+  .container {
+    max-width: 800px;
+    margin: 0 auto;
+    background-color: #fff;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    padding: 20px;
+  }
+  h2 {
+    color: #333;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+  }
+  .section {
+    margin-bottom: 20px;
+  }
+  .data-field {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+    font-size: 16px;
+  }
+  .data-field label {
+    color: #666;
+    font-weight: bold;
+  }
+  #start-time, #end-time {
+    display: block;
+    margin: 10px 0;
+  }
+  #device-list-section button {
+    margin: 10px 0;
+  }
+  #device-list {
+    list-style-type: none;
+    padding: 0;
+  }
+  #device-list li {
+    margin: 5px 0;
+    padding: 5px;
+    background-color: #f0f0f0;
+    border: 1px solid #ddd;
+    cursor: pointer;
+  }
+  canvas {
+    -moz-box-shadow:    inset 0 0 10px #000000;
+    -webkit-box-shadow: inset 0 0 10px #000000;
+    box-shadow:         inset 0 0 10px #000000;
+    margin-bottom: 20px;
+  }
+  .signout-button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .signout-button:hover {
+    background-color: #0056b3;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  
+  <div id="network-information-collection" class="section">
+    <h2>Network Information Collection</h2>
+
+    <div id="network-data"></div>
+  </div>
+
+  
+  <div id="server-design-data-management" class="section">
+    <h2>Server Design and Data Management</h2>
+    <label for="start-time">Start Time:</label>
+    <input type="datetime-local" id="start-time" name="start-time">
+    <label for="end-time">End Time:</label>
+    <input type="datetime-local" id="end-time" name="end-time">
+    <button class="btn btn-primary" onclick="fetchAndDisplayCellData()">Get Data</button>
+  </div>
+
+
+  <div id="performance-graphs" class="section">
+    <h2>Performance Graphs</h2>
+    <canvas id="connectivity-chart"></canvas>
+    <canvas id="snr-chart"></canvas>
+  </div>
+
+
+  <div class="section">
+    <button class="btn btn-secondary" onclick="toggleDeviceList()">Device List</button>
+    <button class="btn btn-danger" onclick="signOut()">Sign out</button>
+    
+    <ul id="device-list" style="display:none;"></ul>
+  </div>
+
+</div>
+
+<script>
+  
+  function updateNetworkInformation(data) {
+    const networkDataDiv = document.getElementById('network-data');
+    networkDataDiv.innerHTML = `
+      <p>Operator Name: ${data.operator}</p>
+      <p>Signal Power: ${data.signal_power}</p>
+      <p>SINR: ${data.sinr}</p>
+      <p>Network Type: ${data.network_type}</p>
+      <p>Frequency Band: ${data.frequency_band}</p>
+      <p>Cell ID: ${data.cell_id}</p>
+      <p>Timestamp: ${data.timestamp}</p>
+    `;
+  }
+
+
+  function fetchAndDisplayCellData() {
+    const startTime = document.getElementById('start-time').value;
+    const endTime = document.getElementById('end-time').value;
+
+    const token = '';
+
+    fetch('/api/cell_data', {
+      method: 'GET',
+      headers: {
+        'Authorization': 'Bearer ' + token
+      },
+      body: JSON.stringify({ start_time: startTime, end_time: endTime })
+    })
+    .then(response => response.json())
+    .then(data => {
+      
+      data.forEach(cellData => updateNetworkInformation(cellData));
+   
+      renderConnectivityChart(data); 
+      renderSNRChart(data); 
+    })
+    .catch(error => console.error('Error fetching cell data:', error));
+  }
+
+
+function renderConnectivityChart(data) {
+  const ctx = document.getElementById('connectivity-chart').getContext('2d');
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: data.map(d => d.timestamp), 
+      datasets: [{
+        label: 'Average Connectivity Time (ms)',
+        data: data.map(d => d.connectivityTime), 
+        fill: false,
+        borderColor: 'rgb(75, 192, 192)',
+        tension: 0.1
+      }]
+    },
+    options: {
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    }
+  });
+}
+
+
+function renderSNRChart(data) {
+  const ctx = document.getElementById('snr-chart').getContext('2d');
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: data.map(d => d.timestamp), 
+      datasets: [{
+        label: 'Average SNR (dB)',
+        data: data.map(d => d.snr), 
+        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+        borderColor: 'rgba(255, 99, 132, 1)',
+        borderWidth: 1
+      }]
+    },
+    options: {
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    }
+  });
+}
+
+
+
+
+function toggleDeviceList() {
+  const deviceList = document.getElementById('device-list');
+  
+  deviceList.style.display = deviceList.style.display === 'none' ? 'block' : 'none';
+
+  if (deviceList.style.display === 'block' && deviceList.innerHTML === '') {
+    
+    fetch('/api/devices', {
+      headers: {
+        'Authorization': 'Bearer ' + sessionStorage.getItem('jwtToken') 
+      }
+    })
+    .then(response => response.json())
+    .then(devices => {
+      
+      devices.forEach(device => {
+        const listItem = document.createElement('li');
+        listItem.textContent = `Device: ${device.name} / IP: ${device.ip} / MAC: ${device.mac}`;
+        deviceList.appendChild(listItem);
+      });
+    })
+    .catch(error => console.error('Error fetching devices:', error));
+  }
+}
+
+
+function signOut() {
+ 
+  sessionStorage.removeItem('jwtToken');
+
+  window.location.href = '/login'; 
+}
+
+
+document.addEventListener('DOMContentLoaded', function() {
+
+});
+
+
+</script>
+
+</body>
+</html>

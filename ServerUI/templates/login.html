@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Secure Network Login</title>
+<style>
+ body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(to right, #6a11cb 0%, #2575fc 100%);
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  color: #fff;
+}
+.login-container {
+  background-color: rgba(255, 255, 255, 0.95);
+  padding: 40px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  width: 350px;
+  transition: all 0.3s ease;
+}
+.login-container h1, .login-container h2 {
+  text-align: center;
+  color: #333;
+  text-shadow: 0px 2px 4px rgba(0,0,0,0.2); /* This will add a shadow to the text for better visibility */
+}
+.login-container h1 {
+  margin: 0 0 10px 0;
+  font-size: 24px; /* Larger size for main title */
+  font-weight: bold; /* Make the title bolder */
+}
+.login-container h2 {
+  font-size: 20px; /* Slightly smaller size for subtitle */
+  font-weight: bold; /* Make the subtitle bolder */
+  margin-bottom: 30px; /* More space after the subtitle */
+}
+.form-group {
+  margin-bottom: 20px;
+}
+.form-group label {
+  display: block;
+  margin-bottom: 10px;
+  color: #555; /* Darker color for labels */
+}
+.form-group input {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 5px;
+  box-sizing: border-box;
+  font-size: 16px;
+  transition: all 0.3s ease;
+}
+.form-group input:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #5073b8;
+}
+.login-button {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  background-color: #007bff;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
+}
+.login-button:hover, .login-button:focus {
+  background-color: #0056b3;
+  outline: none;
+}
+
+</style>
+</head>
+<body>
+
+<div class="login-container">
+  <h1>Secure Network Login</h1>
+  <h2>Login</h2>
+  <form action="/login" method="post"> <!-- Update the action with your login route -->
+    <div class="form-group">
+      <label for="username">Username:</label>
+      <input type="text" id="username" name="username" required>
+    </div>
+    <div class="form-group">
+      <label for="password">Password:</label>
+      <input type="password" id="password" name="password" required>
+    </div>
+    <button type="submit" class="login-button">Log In</button>
+  </form>
+</div>
+
+</body>
+</html>
