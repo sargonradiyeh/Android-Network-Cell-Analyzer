@@ -14,6 +14,18 @@ def clean_data(value):
 @api_bp.route('/cell_data', methods=['POST'])
 @jwt_required()
 def add_cell_data():
+    """
+    Add cell data to the database.
+
+    This function receives a POST request with cell data in JSON format and adds it to the database.
+    The required fields in the JSON data are 'operator', 'signal_power', 'sinr', 'network_type',
+    'frequency_band', 'cell_id', and 'timestamp'.
+
+    Returns:
+        A JSON response with a success message and HTTP status code 201 if the cell data is added successfully.
+        A JSON response with an error message and HTTP status code 422 if there are missing required fields.
+        A JSON response with an error message and HTTP status code 500 if there is an unexpected error.
+    """
     try:
         data = request.json
         required_fields = ['operator', 'signal_power', 'sinr', 'network_type', 'frequency_band', 'cell_id', 'timestamp']

@@ -9,6 +9,16 @@ import re
 
 @auth_bp.route('/signup', methods=['POST'])
 def sign_up():
+    """
+    Sign up a new user.
+
+    This function handles the POST request to '/signup' endpoint and registers a new user.
+    The request should include a JSON payload with 'username' and 'password' fields.
+
+    Returns:
+        A JSON response with a success message if the user is registered successfully.
+        Otherwise, returns a JSON response with an error message and the corresponding HTTP status code.
+    """
     data = request.json
 
     if not {'username', 'password'}.issuperset(data.keys()):
@@ -50,6 +60,13 @@ def sign_up():
 
 @auth_bp.route('/login', methods=['POST'])
 def login():
+    """
+    Authenticates the user by checking the provided username and password.
+    
+    Returns:
+        A JSON response containing a token if the authentication is successful.
+        Otherwise, returns a JSON response with an error message and an appropriate status code.
+    """
     data = request.json
     if 'username' not in data or 'password' not in data:
         return jsonify({'error': 'Username and password are required'}), 400

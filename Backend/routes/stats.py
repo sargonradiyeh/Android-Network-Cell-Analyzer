@@ -16,6 +16,19 @@ def parse_date(date_str):
         return None
 
 def daily_or_total_avg(query, start_date, end_date, group_by_fields):
+    """
+    Calculate the daily or total average based on the given query, start date, end date, and group by fields.
+
+    Args:
+        query (Query): The query object to filter the data.
+        start_date (datetime): The start date for filtering the data.
+        end_date (datetime): The end date for filtering the data.
+        group_by_fields (list): The list of fields to group the data by.
+
+    Returns:
+        list: A list of results representing the daily or total average.
+
+    """
     if start_date and end_date:
         query = query.filter(
             and_(CellData.timestamp >= start_date, CellData.timestamp <= end_date)
@@ -26,6 +39,19 @@ def daily_or_total_avg(query, start_date, end_date, group_by_fields):
 @stats_bp.route('/average_connectivity_time_per_operator', methods=['GET'])
 @jwt_required()
 def average_connectivity_time_per_operator():
+    """
+    Calculate the average connectivity time per operator.
+
+    This function retrieves the current user's identity and the start and end dates from the request arguments.
+    It then constructs a base query to calculate the time difference between consecutive timestamps for each operator.
+    If start and end dates are provided, the base query is filtered accordingly.
+    A subquery is created from the base query, and an operator stats query is performed to calculate the average time for each operator.
+    The total average time is calculated by summing the average times for all operators.
+    Finally, the result is formatted as a list of dictionaries containing the operator and the average connectivity percentage.
+
+    Returns:
+        A JSON response containing the result and a status code of 200.
+    """
     current_user_id = get_jwt_identity()
     start_date = parse_date(request.args.get('start_date'))
     end_date = parse_date(request.args.get('end_date'))
@@ -66,6 +92,15 @@ def average_connectivity_time_per_operator():
 @stats_bp.route('/average_connectivity_time_per_network_type', methods=['GET'])
 @jwt_required()
 def average_connectivity_time_per_network_type():
+    """
+    Calculate the average connectivity time per network type for the current user within a specified date range.
+
+    Returns:
+        A JSON response containing the average connectivity time per network type.
+
+    Raises:
+        None
+    """
     current_user_id = get_jwt_identity()
     start_date = parse_date(request.args.get('start_date'))
     end_date = parse_date(request.args.get('end_date'))
@@ -97,6 +132,15 @@ def average_connectivity_time_per_network_type():
 @stats_bp.route('/average_signal_power_per_network_type', methods=['GET'])
 @jwt_required()
 def average_signal_power_per_network_type():
+    """
+    Calculate the average signal power per network type for the current user within a specified date range.
+
+    Returns:
+        A JSON response containing the average signal power per network type.
+
+    Raises:
+        None.
+    """
     current_user_id = get_jwt_identity()
     start_date = parse_date(request.args.get('start_date'))
     end_date = parse_date(request.args.get('end_date'))
@@ -120,6 +164,15 @@ def average_signal_power_per_network_type():
 @stats_bp.route('/average_signal_power_per_device', methods=['GET'])
 @jwt_required()
 def average_signal_power_per_device():
+    """
+    Calculate the average signal power per device for a given user within a specified date range.
+
+    Returns:
+        A JSON response containing the average signal power per device.
+
+    Raises:
+        None.
+    """
     current_user_id = get_jwt_identity()
     start_date = parse_date(request.args.get('start_date'))
     end_date = parse_date(request.args.get('end_date'))
@@ -143,6 +196,15 @@ def average_signal_power_per_device():
 @stats_bp.route('/average_snr_or_sinr_per_network_type', methods=['GET'])
 @jwt_required()
 def average_snr_or_sinr_per_network_type():
+    """
+    Calculate the average SINR (Signal-to-Interference-plus-Noise Ratio) per network type for the current user.
+
+    Returns:
+        A JSON response containing the average SINR per network type.
+
+    Raises:
+        None.
+    """
     current_user_id = get_jwt_identity()
     start_date = parse_date(request.args.get('start_date'))
     end_date = parse_date(request.args.get('end_date'))
