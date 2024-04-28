@@ -14,6 +14,17 @@ Install the required packages from `requirements.txt`:
    pip install -r requirements.txt
    ```
 
+Download workbench and mysql:
+
+- https://dev.mysql.com/downloads/workbench/
+- https://www.mysql.com/downloads/
+
+When installing mysql make sure you read the installation steps carefully and choose an easy password, if you forget it, it will be a nightmare restoring it.
+After doing so, change the config.py file to change the password "jason2002" to your own password
+
+After installing mysql, install workbench. When the installation is completed, sign in to the database and then add a schema called celldata.
+
+If you choose another name, please make sure you change it in the config.py file. 
 
 ### Database Setup
 To set up and initialize the database, run the following commands:
