@@ -30,6 +30,8 @@ clients = {}
 def handle_connect():
     clients[request.sid] = request.remote_addr
     print(f"New connection: {request.sid} from {request.remote_addr}")
+    print(f"Connected clients ({len(clients)}): {list(clients.values())}")
+
 
 @socketio.on('disconnect')
 def handle_disconnect():
