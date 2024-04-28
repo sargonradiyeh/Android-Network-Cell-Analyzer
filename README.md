@@ -37,6 +37,8 @@ The backend has been deployed on a local server accessible via:
 
 [https://jason.hydra-polaris.ts.net](https://jason.hydra-polaris.ts.net)
 
+Make sure to replace the server URL to 127.0.0.1:PORT if running locally on the android app
+
 *Note: The server can be turned on upon request as it is typically kept offline to protect local ports from public access.*
 
 ## API Routes and Functionalities
