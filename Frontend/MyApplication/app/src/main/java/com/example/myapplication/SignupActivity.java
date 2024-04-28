@@ -1,5 +1,6 @@
 package com.example.myapplication;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -95,6 +96,8 @@ public class SignupActivity extends AppCompatActivity {
                                     @Override
                                     public void run() {
                                         Toast.makeText(getApplicationContext(), "Signup successful!", Toast.LENGTH_SHORT).show();
+                                        Log.d("SignupActivity", "Response Code: " + responseCode); // Log response code
+
                                         // Optionally, redirect to login page
                                     }
                                 });
@@ -104,6 +107,8 @@ public class SignupActivity extends AppCompatActivity {
                                     @Override
                                     public void run() {
                                         Toast.makeText(getApplicationContext(), "Signup failed. Please try again later.", Toast.LENGTH_SHORT).show();
+                                        Log.d("SignupActivity", "Response Code: " + responseCode); // Log response code
+
                                     }
                                 });
                             }
