@@ -77,7 +77,6 @@ The project is divided into two main components:
    ```bash
    flask run --host=0.0.0.0 --debug --port=5000
    ```
-   *Note:* For testing purposes, the server is also available locally at [https://jason.hydra-polaris.ts.net](https://jason.hydra-polaris.ts.net).
 
 ### Android App Setup
 
