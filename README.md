@@ -1,73 +1,126 @@
-# Cellular Data Analysis Project
+# Network Cell Analyzer
 
 ## Overview
-The Cellular Data Analysis Project is a Flask-based web application designed to analyze and visualize cellular network data. It provides various endpoints for users to access statistical insights into network performance metrics such as signal power, connectivity time, and network type. The project utilizes Flask, SQLAlchemy for database management, Flask-JWT-Extended for authentication, and Flask-SocketIO for WebSocket support.
 
-## Setup and Running the Server
+Network Cell Analyzer is an Android application designed to provide in-depth analysis of cellular network data. By capturing key parameters—such as cell IDs, frequency bands, operator details, signal strength, and network type—the app offers real-time insights into mobile network performance. The collected data is transmitted to a centralized Flask-based server, where it is processed, stored, and visualized.
 
-Before running the server, ensure that all dependencies are installed and the database is set up properly.
+---
 
-### Installation
-Install the required packages from `requirements.txt`:
+## Features
 
+- **Real-Time Data Collection:**  
+  Gathers essential cellular information from mobile devices using Android telephony APIs.
+
+- **Secure User Authentication:**  
+  Implements login and sign-up functionalities with JWT-based authentication.
+
+- **Data Transmission & Storage:**  
+  Periodically sends collected cell data to a Flask server where it is stored using a database (managed via Flask-Migrate).
+
+- **WebSocket Communication:**  
+  Uses Flask-SocketIO for real-time updates between the server and client applications.
+
+- **Statistics & Visualization:**  
+  Provides statistical analysis (e.g., average connectivity time, signal power, and SNR) with data visualization through charts and graphs.
+
+- **Server UI:**  
+  Features a web-based interface for monitoring connected devices, viewing network performance, and managing data.
+
+---
+
+## Architecture
+
+The project is divided into two main components:
+
+1. **Android Frontend:**  
+   - Developed using **Java** and **XML**.  
+   - Handles user interactions (login, signup, home screen, and statistics display).  
+   - Collects cell data from the device and communicates with the backend.
+
+2. **Flask Backend:**  
+   - Built with **Python** using the Flask framework.  
+   - Manages user authentication, data processing, and API endpoints.  
+   - Employs **Flask-SocketIO** for real-time communication and **Flask-Migrate** for database management.
+
+---
+
+## Setup and Installation
+
+### Prerequisites
+
+- **Python 3.x**
+- **pip** (Python package manager)
+- **Android Studio** (for the Android app)
+
+### Backend Setup
+
+1. **Clone the Repository:**
+   ```bash
+   git clone https://github.com/your-username/your-repo.git
+   cd your-repo
+   ```
+
+2. **Install Dependencies:**
    ```bash
    pip install -r requirements.txt
    ```
 
-Download workbench and mysql:
+3. **Database Initialization:**
+   Set up the database using Flask-Migrate:
+   ```bash
+   flask db init
+   flask db migrate
+   flask db upgrade
+   ```
 
-- https://dev.mysql.com/downloads/workbench/
-- https://www.mysql.com/downloads/
+4. **Run the Server:**
+   ```bash
+   flask run --host=0.0.0.0 --debug --port=5000
+   ```
+   *Note:* For testing purposes, the server is also available locally at [https://jason.hydra-polaris.ts.net](https://jason.hydra-polaris.ts.net).
 
-When installing mysql make sure you read the installation steps carefully and choose an easy password, if you forget it, it will be a nightmare restoring it.
-After doing so, change the config.py file to change the password "jason2002" to your own password
+### Android App Setup
 
-After installing mysql, install workbench. When the installation is completed, sign in to the database and then add a schema called celldata.
+- Open the project in **Android Studio**.
+- Ensure all necessary permissions are declared in `AndroidManifest.xml`.
+- Build and run the app on an Android device or emulator.
 
-If you choose another name, please make sure you change it in the config.py file. 
+---
 
-### Database Setup
-To set up and initialize the database, run the following commands:
+## Testing
 
-```bash
-flask db init
-flask db migrate
-flask db upgrade
-```
+The application has been rigorously tested across multiple functionalities:
 
+- **Authentication:**  
+  Secure login and signup processes have been validated with proper error handling.
+  
+- **Real-Time Updates:**  
+  WebSocket connectivity has been verified to ensure seamless real-time communication.
+  
+- **Data Transmission:**  
+  Periodic sending of cell data from the Android app to the backend has been confirmed.
+  
+- **Statistics & Visualization:**  
+  Statistical data retrieval and chart displays have been tested for accuracy and responsiveness.
 
-### Running the Server
-To run the server on your local machine, use the following command:
+---
 
-```bash
-flask run --host=0.0.0.0 --debug --port=5000
-```
+## Team Members
 
-### Accessing the Deployed Server
-The backend has been deployed on a local server accessible via:
+- **Sarjoun Radiyeh:**  
+  Android Login, Signup, Home Screen, Cell Data Sender, Data Retrieval, WebSocket Integration, and Testing.
 
-[https://jason.hydra-polaris.ts.net](https://jason.hydra-polaris.ts.net)
+- **Jason Salem:**  
+  Backend Development, Database Configuration, Realtime Socket Implementation, Deployment, and Testing.
+  
+- **Hadi El Nawfal:**  
+  Android Statistics, XML Layouts for Statistics, Debugging/Testing, and Demo Video Production.
+  
+- **Serop Elmayan:**  
+  Server UI Development and Presentation.
+  
+- **Adel El Kadi:**  
+  Android XML Design and Presentation.
 
-Make sure to replace the server URL to 127.0.0.1:PORT if running locally on the android app
+---
 
-*Note: The server can be turned on upon request as it is typically kept offline to protect local ports from public access.*
-
-## API Routes and Functionalities
-
-This API consists of multiple endpoints grouped by their functionality, and statistical data retrieval.
-
-1. `/auth/login`: Handles user authentication by accepting POST requests containing JSON data with 'username' and 'password' fields. Returns a JWT access token upon successful authentication.
-
-2. `/api/cell_data`: Allows users to add cellular data records through POST requests. Requires JWT authentication. Validates and processes incoming data and stores it in the database.
-
-3. `/stats/average_connectivity_time_per_operator`: Computes the average connectivity time per operator for a given user within a specified time range.
-
-4. `/stats/average_connectivity_time_per_network_type`: Calculates the average connectivity time per network type for a given user within a specified time range.
-
-5. `/stats/average_signal_power_per_network_type`: Computes the average signal power per network type for a given user within a specified time range.
-
-6. `/stats/average_signal_power_per_device`: Calculates the average signal power per device (cell ID) for a given user within a specified time range.
-
-7. `/stats/average_snr_or_sinr_per_network_type`: Computes the average Signal-to-Noise Ratio (SNR) or Signal-to-Interference-plus-Noise Ratio (SINR) per network type for a given user within a specified time range.
-
-These endpoints provide detailed insights into various aspects of cellular network performance, facilitating informed decision-making for network optimization and management.
